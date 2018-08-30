@@ -1,0 +1,46 @@
+const path = require('path')
+const express = require('express')
+const exphbs = require('express-handlebars')
+const port = 2280
+const app = express()
+
+
+var rqst = new XMLHttpRequest()
+request.open('GET', '', 
+
+
+
+////app.engine('.hbs', exphbs({
+////    defaultLayout: 'main',
+////    extname: '.hbs',
+////    layoutsDir: path.join(__dirname, 'views/layouts')
+////}))
+
+////app.set('view engine', '.hbs')
+////app.set('views', path.join(__dirname, 'views'))
+
+//const requestHandler
+app.get('/', (request, response) => {
+//    console.log(request.url)
+    Throw new Error('ooops')
+///    response.send('Hello IoT Server!')
+})
+
+//const server = http.createServer(requestHandler)
+
+
+app.use((err, request, response, next)  => {
+    console.log(err)
+    response.status(500).send(`S0mething went wr0ng`)
+
+})
+
+
+app.listen(port) ///, (err) => {
+///    if (err) {
+///        return console.log('s0mething went wr0ng', err)
+///    }
+
+///    console.log(`server is listening on ${port}`)
+
+///})

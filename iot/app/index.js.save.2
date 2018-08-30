@@ -1,0 +1,193 @@
+const path = require('path')
+const express = require('express')
+const bodyParser = require('body-parser')
+const exphbs = require('express-handlebars')
+const pg = require('pg')
+
+const port = 8083
+const app = express()
+//const conString = process.env.DATABASE_URL || "postgres://localhost/iot"
+
+var jsonParser = bodyParser.json({ type: 'application/json' })
+
+const config = {
+    user: 'iot',
+    host: 'localhost',
+    database: 'iot',
+    password: 's77root'
+}
+
+var pool = new pg.Pool(config)
+
+
+
+app.engine('.hbs', exphbs({
+    defaultLayout: 'main',
+    extname: '.hbs',
+    layoutsDir: path.join(__dirname, 'views/layouts')
+}))
+
+app.set('view engine', '.hbs')
+app.set('views', path.join(__dirname, 'views'))
+
+
+
+app.listen(port, (err) => {
+    if (err) {
+        return console.log('s0mething went wr0ng', err)
+    }
+    console.log(`server is listening on ${port}`)
+})
+
+
+app.get('/', (request, response) => {
+    console.log('someone came!')
+
+    response.render('index', {
+    })
+})
+
+
+app.get('/ertele', (request, response) => {
+    console.log('someone visited ertele!')
+
+
+        client.query('SELECT timestamp, device_id, payload_hex FROM records;', [], function (err, result) {
+            if (err) {
+                console.log('reading err')
+                return next(err)
+            }
+//            console.log(result.rows)
+            var selection = {
+                data: result.rows
+            }
+            console.log(selection)
+
+        })
+
+
+
+
+
+    response.render('data', {
+        provider: 'ErTelecom'
+    })
+})
+
+
+app.get('/strij', (request, response) => {
+    console.log('someone visited strij!')
+
+    response.render('data', {
+        provider: 'Strij'
+    })
+})
+
+
+
+app.post('/', jsonParser, function (request, response, next) {
+    console.log()
+    console.log(' someone send new data!')
+    message = request.body.DevEUI_uplink
+    console.log('    Timestamp: ', message.Time)
+    console.log('    Device ID: ', message.DevEUI)
+    console.log('    Payload, hex: ', message.payload_hex)
+
+
+    pool.connect(function (err, client, done) {
+        if (err) {
+            console.log('connecting err')
+            return next(err)
+        }
+
+        console.log('connected to db')
+
+        client.query('INSERT INTO records (device_id, timestamp, payload_hex) VALUES ($1, $2, $3);', [message.DevEUI, message.Time, message.payload_hex], function (err, result) {
+            done()
+            if (err) {
+                console.log('writing err')
+                return next(err)
+            }
+
+//            response.sendStatus(200)
+        })
+
+
+    })
+
+
+    response.render('home', {
+        name: 'Ann'
+    })
+})
+
+
+
+
+
+//*
+Handlebars.registerHelper('table', function(items, options) {
+    var out = "<tr>"
+
+    for(var i=0, n=items.length; i<n; i++) {
+        out = out
+    }
+})
+
+*//
+
+
+
+
+
+
+//____________________________________
+
+
+
+
+//    throw new Error('ooops')
+//const server = http.createServer(requestHandler)
+
+
+
+
+//app.get('/', (request, response) => {
+///    response.send('Hello IoT Server!')
+//})
+
+
+
+
+
+/*
+app.use((err, request, response, next)  => {
+    console.log(err)
+    response.status(500).send(`S0mething went wr0ng`)
+
+})
+*/
+
+
+
+/* const rqst = require('request-promise')
+const options = {
+    method : 'GET',
+    uri : 'api.strij.cloud/api/devices/',
+    qs : {
+        access-token: be39b077b5f2d84323117b8db24d59aed069b619fcf9550afe81684cd09fa93a,
+        per-page: 1000,
+        page: 1
+    },
+    json : true
+}
+
+rqst(options)
+    .then(function (response) {
+    
+    })
+    .catch(function (err) {
+        console.log('bad at the strij part')
+    })
+
+*/
